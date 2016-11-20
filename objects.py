@@ -5,13 +5,17 @@ Created on Fri Nov 18 11:52:01 2016
 @author: em1715
 """
 import numpy as _np
+import matplotlib.pyplot as _plt
 
 
-def close(float1, float2):
+def close(float1, float2=0.):
+    """Determine if two floats are close enough to be equal. Return bool."""
     if abs(float1 - float2) <= (100. * _np.finfo(float).eps):
         return True
     else:
         return False
+
+
 class Ball:
     """"""
 
@@ -56,7 +60,7 @@ class Ball:
         self._radius = float(radius)
         self._pos = _np.array(pos)
         self._vel = _np.array(vel)
-        self._patch = None
+        self._patch = _plt.Circle(self._pos[:-1], self.radius)
 
     def getPos(self):
         """
@@ -102,6 +106,25 @@ class Ball:
 
     def time_to_collision(self, other):
         # @todo
+        None
 
     def collide(self, other):
         # @todo
+        None
+
+
+class Container:
+    """"""
+
+    def __init__(self, radius):
+        if type(radius) not in (int, float):
+            raise TypeError(
+                "radius is type {}, should be int or float".format(
+                    type(radius)
+                )
+            )
+        if radius <= 0:
+            raise ValueError("radius is {}, should be positive".format(radius))
+
+        self._radius = float(radius)
+        self._patch = _plt.Circle((0,0), self._radius)
