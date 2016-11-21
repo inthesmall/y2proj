@@ -128,10 +128,10 @@ class Ball:
             return None
         minimum = min(dt1, dt2)
         if minimum > 0:
-            return _np.real(minimum)
+            return float(minimum)
         maximum = max(dt1, dt2)
         if maximum > 0:
-            return _np.real(maximum)
+            return float(maximum)
         else:
             return None
 
