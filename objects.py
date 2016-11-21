@@ -60,7 +60,7 @@ class Ball:
         self._radius = float(radius)
         self._pos = _np.array(pos)
         self._vel = _np.array(vel)
-        self._patch = _plt.Circle(self._pos[:-1], self.radius)
+        self._patch = _plt.Circle(self._pos[:-1], self._radius)
 
     def getPos(self):
         """
@@ -73,6 +73,10 @@ class Ball:
         Return velocity as numpy array with 3 components [v_x, v_y, v_z]
         """
         return self._vel
+
+    def getRadius(self):
+        """Return radius as a float"""
+        return self._radius
 
     def setPos(self, new_pos):
         if type(new_pos) not in (list, _np.array):
@@ -106,7 +110,30 @@ class Ball:
 
     def time_to_collision(self, other):
         # @todo
-        None
+        r1 = self.getPos()
+        v1 = self.getVel()
+        rad1 = self.getRadius()
+        r2 = other.getPos()
+        v2 = other.getVel()
+        rad2 = other.getRadius()
+        # Define a, b, c of the quadratic equation in dt
+        a = _np.dot((v1 - v2), (v1 - v2))
+        a = float(a)
+        b = 2 * _np.dot((r1 - r2), (v1 - v2))
+        b = float(b)
+        c = _np.dot((r1 - r2), (r1 - r2)) - ((rad1 + rad2) * (rad1 + rad2))
+        dt1 = (-b + _np.sqrt(_np.complex(b*b - 4*a*c))) / (2*a)
+        dt2 = (-b - _np.sqrt(_np.complex(b*b - 4*a*c))) / (2*a)
+        if _np.imag(dt1) != 0:
+            return None
+        minimum = min(dt1, dt2)
+        if minimum > 0:
+            return _np.real(minimum)
+        maximum = max(dt1, dt2)
+        if maximum > 0:
+            return _np.real(maximum)
+        else:
+            return None
 
     def collide(self, other):
         # @todo
@@ -127,4 +154,20 @@ class Container:
             raise ValueError("radius is {}, should be positive".format(radius))
 
         self._radius = float(radius)
-        self._patch = _plt.Circle((0,0), self._radius)
+        self._patch = _plt.Circle((0, 0), self._radius)
+
+    def getPos(self):
+        """Return zero vector for use with collisions"""
+        return _np.array([0, 0, 0])
+
+    def getVel(self):
+        """Return zero vector for use with collisions"""
+        return _np.array([0, 0, 0])
+
+    def getRadius(self):
+        """Return negative radius as float.
+
+        Radius is negative to allow interoperability with standard
+        Ball.time_to_collision()
+        """
+        return - self._radius
