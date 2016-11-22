@@ -82,6 +82,10 @@ class Ball:
         """ """
         return self._mass
 
+    def getPatch(self):
+        """ """
+        return self._patch
+
     def setPos(self, new_pos):
         if type(new_pos) not in (list, _np.array):
             raise TypeError(
@@ -146,7 +150,7 @@ class Ball:
         """
         oPos = other.getPos()
         oVel = other.getVel()
-        print "oVel =", oVel
+        # print "oVel =", oVel
         oMass = other.getMass()
         Pos = self.getPos()
         Vel = self.getVel()
@@ -154,50 +158,22 @@ class Ball:
         r = oPos - Pos
         r = r / (_np.dot(r, r))
         u1_perp = _np.dot(Vel, r) * r
-        print "u1_perp =", u1_perp
+        # print "u1_perp =", u1_perp
         u2_perp = _np.dot(oVel, -r) * -r
-        print "u2_perp =", u2_perp
+        # print "u2_perp =", u2_perp
         v1_para = Vel - u1_perp
-        print "v1_para =", v1_para
+        # print "v1_para =", v1_para
         v2_para = oVel - u2_perp
-        print "v2_para =", v2_para
+        # print "v2_para =", v2_para
         v1_perp = ((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp)) /
                    (Mass + oMass))
         v2_perp = ((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass)) /
                    (Mass + oMass))
-        print "v1_perp =", v1_perp
-        print "v2_perp =", v2_perp
-        v1 = v1_perp  + v1_para
-        v2 = v2_perp  + v2_para
+        # print "v1_perp =", v1_perp
+        # print "v2_perp =", v2_perp
+        v1 = v1_perp + v1_para
+        v2 = v2_perp + v2_para
         return v1, v2
-
-
-
-
-
-        # @todo
-        # oPos = other.getPos()
-        # oVel = other.getVel()
-        # r = self.getPos() - oPos
-        # print "r =", r
-        # mag_r = _np.sqrt(_np.dot(r, r))
-        # print "mag_r =", mag_r
-        # if close(mag_r, 0.):
-        #     raise ValueError("Your balls are in the same place?!")
-        # r = r / mag_r
-        # print "r =", r
-        # u1 = _np.dot(self.getVel(), r)
-        # print "u1 =", u1
-        # u2 = _np.dot(oVel, r)
-        # print "u2 =", u2
-        # v11 = (u1 + u2 + _np.sqrt((u1*u1) + (u2*u2) - (2*u1*u2))) / 2
-        # v12 = (u1 + u2 - _np.sqrt((u1*u1) + (u2*u2) - (2*u1*u2))) / 2
-        # v21 = u1 + u2 - v11
-        # v22 = u1 + u2 - v12
-        # return v11, v12, v21, v22
-        # # if call:
-        # #     other.collide(self, False)
-        # None
 
 
 class Container:
@@ -214,7 +190,7 @@ class Container:
             raise ValueError("radius is {}, should be positive".format(radius))
 
         self._radius = float(radius)
-        self._patch = _plt.Circle((0, 0), self._radius)
+        self._patch = _plt.Circle((0, 0), self._radius, fill=False)
 
     def getPos(self):
         """Return zero vector for use with collisions"""
@@ -231,3 +207,7 @@ class Container:
         Ball.time_to_collision()
         """
         return - self._radius
+
+    def getPatch(self):
+        """ """
+        return self._patch
