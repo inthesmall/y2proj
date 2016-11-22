@@ -4,9 +4,14 @@ Created on Fri Nov 18 19:20:05 2016
 
 @author: em1715
 """
+import heapq
 import numpy as _np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 import objects
+
+FRAMERATE = 50.
 
 
 class System:
@@ -16,40 +21,83 @@ class System:
     """
 
     def __init__(self, balls, container):
-        """@todo include list of objects in the system.
-        Maybe variable for next collision time and objects.
-        time variable
+        """Initialise the system with objects
+
+        Args:
+            balls: list, objects.Ball to include in system
+            container: objects.Container for system
+
+        Defines:
+            self._balls: list of balls in system
+            self._container: the container
+            self._objects: All objects in system (balls + container)
+            self._collisions: a heap of the next collisions with 
+                format [time_to_collision, (object1, object2)]
         """
         # input checking
+        if type(balls) is not list:
+            raise TypeError("balls is not of type list")
+        if isinstance(container, objects.Container) is False:
+            raise TypeError("container is not instance of Container")
         self._balls = balls
         self._container = container
         self._objects = self._balls[:]
         self._objects.append(self._container)
         self._collisions = []
-        None
 
-    def init_figure(self):
-        """@todo initialise animation"""
-        colls = []
+    def init_figure(self, figure):
+        """Generate starting collisions heap, then initialise animation.
+        @todo initialise animation
+        """
         for ball in self._balls:
             collTimes = []
-            for obj in self._objects:
-                if obj == ball: continue
-                collTimes.append([ball.time_to_collision(obj), (ball, obj)])
-                print collTimes
-            colls.append(min(collTimes))
-        colls.sort()
-        print colls
-        self._collisions = colls
+            for other in self._objects:
+                if other == ball:
+                    continue
+                time_to_coll = ball.time_to_collision(other)
+                if time_to_coll is not None:
+                    collTimes.append([time_to_coll, (ball, other)])
+                # print collTimes
+            heapq.heappush(self._collisions, min(collTimes))
+        # draw the figures
+        figure.add_artist(self._container.getPatch())
+        for ball in self._balls:
+            figure.add_patch(ball.getPatch())
 
-    def next_frame(self):
-        """@todo calls and renders next frame of animation.
+    def next_frame(self, f):
+        """Called by matplotlib.animation.FuncAnimation()
+
+        @todo draws next frame of animation.
         If the next collision occurs before the next frame, call collide
         instead.
+        Args:
+            f: int, framenumber
         """
-        None
+        t = f / FRAMERATE
+        return t
+        next_coll = self._collisions[0]
+        if next_coll <= t:
+            self.collide()
+        else:
+            # draw the next frame
+            None
 
     def collide(self):
         """@todo performs queued collision, then calculate and queue
         next collision"""
-        None
+        next_coll = heapq.heappop(self._collisions)
+        obj1, obj2 = next_coll[1]
+        obj1.collide(obj2, True)
+        for obj in [obj1, obj2]:
+            if isinstance(obj, objects.Container):
+                continue
+            collTimes = []
+            for other in self._objects:
+                if obj == other:
+                    continue
+                time_to_coll = obj.time_to_collision(other)
+                if time_to_coll is not None:
+                    collTimes.append(
+                        [obj.time_to_collision(other), (obj, other)]
+                    )
+            heapq.heappush(self._collisions, min(collTimes))
