@@ -78,6 +78,10 @@ class Ball:
         """Return radius as a float"""
         return self._radius
 
+    def getMass(self):
+        """ """
+        return self._mass
+
     def setPos(self, new_pos):
         if type(new_pos) not in (list, _np.array):
             raise TypeError(
@@ -86,6 +90,7 @@ class Ball:
                 )
             )
         self._pos = _np.array(new_pos)
+        self._patch.center = self.pos_[:-1]
 
     def setVel(self, new_vel):
         if type(new_vel) not in (list, _np.array):
@@ -122,8 +127,8 @@ class Ball:
         b = 2 * _np.dot((r1 - r2), (v1 - v2))
         b = float(b)
         c = _np.dot((r1 - r2), (r1 - r2)) - ((rad1 + rad2) * (rad1 + rad2))
-        dt1 = (-b + _np.sqrt(_np.complex(b*b - 4*a*c))) / (2*a)
-        dt2 = (-b - _np.sqrt(_np.complex(b*b - 4*a*c))) / (2*a)
+        dt1 = (-b + _np.sqrt(_np.complex(b * b - 4 * a * c))) / (2 * a)
+        dt2 = (-b - _np.sqrt(_np.complex(b * b - 4 * a * c))) / (2 * a)
         if _np.imag(dt1) != 0:
             return None
         minimum = min(dt1, dt2)
@@ -135,9 +140,64 @@ class Ball:
         else:
             return None
 
-    def collide(self, other):
+    def collide(self, other, call=True):
+        """Currently only works for Ball - Ball collisions.
+        @todo: implement Container - Ball collisions
+        """
+        oPos = other.getPos()
+        oVel = other.getVel()
+        print "oVel =", oVel
+        oMass = other.getMass()
+        Pos = self.getPos()
+        Vel = self.getVel()
+        Mass = self.getMass()
+        r = oPos - Pos
+        r = r / (_np.dot(r, r))
+        u1_perp = _np.dot(Vel, r) * r
+        print "u1_perp =", u1_perp
+        u2_perp = _np.dot(oVel, -r) * -r
+        print "u2_perp =", u2_perp
+        v1_para = Vel - u1_perp
+        print "v1_para =", v1_para
+        v2_para = oVel - u2_perp
+        print "v2_para =", v2_para
+        v1_perp = ((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp)) /
+                   (Mass + oMass))
+        v2_perp = ((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass)) /
+                   (Mass + oMass))
+        print "v1_perp =", v1_perp
+        print "v2_perp =", v2_perp
+        v1 = v1_perp  + v1_para
+        v2 = v2_perp  + v2_para
+        return v1, v2
+
+
+
+
+
         # @todo
-        None
+        # oPos = other.getPos()
+        # oVel = other.getVel()
+        # r = self.getPos() - oPos
+        # print "r =", r
+        # mag_r = _np.sqrt(_np.dot(r, r))
+        # print "mag_r =", mag_r
+        # if close(mag_r, 0.):
+        #     raise ValueError("Your balls are in the same place?!")
+        # r = r / mag_r
+        # print "r =", r
+        # u1 = _np.dot(self.getVel(), r)
+        # print "u1 =", u1
+        # u2 = _np.dot(oVel, r)
+        # print "u2 =", u2
+        # v11 = (u1 + u2 + _np.sqrt((u1*u1) + (u2*u2) - (2*u1*u2))) / 2
+        # v12 = (u1 + u2 - _np.sqrt((u1*u1) + (u2*u2) - (2*u1*u2))) / 2
+        # v21 = u1 + u2 - v11
+        # v22 = u1 + u2 - v12
+        # return v11, v12, v21, v22
+        # # if call:
+        # #     other.collide(self, False)
+        # None
 
 
 class Container:
