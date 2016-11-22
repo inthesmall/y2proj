@@ -31,7 +31,7 @@ class System:
             self._balls: list of balls in system
             self._container: the container
             self._objects: All objects in system (balls + container)
-            self._collisions: a heap of the next collisions with 
+            self._collisions: a heap of the next collisions with
                 format [time_to_collision, (object1, object2)]
         """
         # input checking
@@ -49,6 +49,7 @@ class System:
         """Generate starting collisions heap, then initialise animation.
         @todo initialise animation
         """
+        ret = []
         for ball in self._balls:
             collTimes = []
             for other in self._objects:
@@ -63,6 +64,8 @@ class System:
         figure.add_artist(self._container.getPatch())
         for ball in self._balls:
             figure.add_patch(ball.getPatch())
+            ret.append(ball.getPatch())
+        return ret
 
     def next_frame(self, f):
         """Called by matplotlib.animation.FuncAnimation()
@@ -73,17 +76,15 @@ class System:
         Args:
             f: int, framenumber
         """
-        t = f / FRAMERATE
-        return t
-        next_coll = self._collisions[0]
-        if next_coll <= t:
-            self.collide()
-        else:
-            # draw the next frame
-            None
+        patches = []
+        step = self.check_collide(f)
+        for ball in self._balls:
+            ball.move(step)
+            patches.append(ball.getPatch())
+        return patches
 
     def collide(self):
-        """@todo performs queued collision, then calculate and queue
+        """@todo perform queued collision, then calculate and queue
         next collision"""
         next_coll = heapq.heappop(self._collisions)
         obj1, obj2 = next_coll[1]
@@ -101,3 +102,18 @@ class System:
                         [obj.time_to_collision(other), (obj, other)]
                     )
             heapq.heappush(self._collisions, min(collTimes))
+
+    def check_collide(self, f):
+        """ """
+        t = f / FRAMERATE
+        dt = 1 / FRAMERATE
+        next_coll_t = self._collisions[0][0]
+        if next_coll_t <= t:
+            step = dt - (t - next_coll_t)
+            for ball in self._balls:
+                ball.move(step)
+            self.collide()
+            ret = self.check_collide(f)
+            return ret - step
+        else:
+            return dt
