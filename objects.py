@@ -148,32 +148,43 @@ class Ball:
         """Currently only works for Ball - Ball collisions.
         @todo: implement Container - Ball collisions
         """
-        oPos = other.getPos()
-        oVel = other.getVel()
-        # print "oVel =", oVel
-        oMass = other.getMass()
         Pos = self.getPos()
         Vel = self.getVel()
-        Mass = self.getMass()
-        r = oPos - Pos
-        r = r / (_np.dot(r, r))
-        u1_perp = _np.dot(Vel, r) * r
-        # print "u1_perp =", u1_perp
-        u2_perp = _np.dot(oVel, -r) * -r
-        # print "u2_perp =", u2_perp
-        v1_para = Vel - u1_perp
-        # print "v1_para =", v1_para
-        v2_para = oVel - u2_perp
-        # print "v2_para =", v2_para
-        v1_perp = ((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp)) /
-                   (Mass + oMass))
-        v2_perp = ((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass)) /
-                   (Mass + oMass))
-        # print "v1_perp =", v1_perp
-        # print "v2_perp =", v2_perp
-        v1 = v1_perp + v1_para
-        v2 = v2_perp + v2_para
-        return v1, v2
+        oMass = other.getMass()
+        if oMass < 0:
+            # Collided with container
+            r_norm = Pos / _np.dot(Pos, Pos)
+            u_perp = _np.dot(Vel, r_norm) * r_norm
+            v_para = Vel - u_perp
+            v_perp = -u_perp
+            v = v_perp + v_para
+            self.setVel(v)
+        else:
+            oPos = other.getPos()
+            oVel = other.getVel()
+            # print "oVel =", oVel
+            
+            Mass = self.getMass()
+            r = oPos - Pos
+            r = r / (_np.dot(r, r))
+            u1_perp = _np.dot(Vel, r) * r
+            # print "u1_perp =", u1_perp
+            u2_perp = _np.dot(oVel, -r) * -r
+            # print "u2_perp =", u2_perp
+            v1_para = Vel - u1_perp
+            # print "v1_para =", v1_para
+            v2_para = oVel - u2_perp
+            # print "v2_para =", v2_para
+            v1_perp = ((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp)) /
+                       (Mass + oMass))
+            v2_perp = ((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass)) /
+                       (Mass + oMass))
+            # print "v1_perp =", v1_perp
+            # print "v2_perp =", v2_perp
+            v1 = v1_perp + v1_para
+            v2 = v2_perp + v2_para
+            self.setVel(v1)
+            other.setVel(v2)
 
 
 class Container:
@@ -211,3 +222,6 @@ class Container:
     def getPatch(self):
         """ """
         return self._patch
+
+    def getMass(self):
+        return -1
