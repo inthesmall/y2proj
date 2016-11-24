@@ -94,7 +94,7 @@ class Ball:
                 )
             )
         self._pos = _np.array(new_pos)
-        self._patch.center = self.pos_[:-1]
+        self._patch.center = self._pos[:-1]
 
     def setVel(self, new_vel):
         if type(new_vel) not in (list, _np.array, _np.ndarray):
@@ -105,16 +105,16 @@ class Ball:
             )
         self._vel = _np.array(new_vel)
 
-    def move(self, dt):
-        if type(dt) not in (int, float):
+    def move(self, step):
+        if type(step) not in (int, float):
             raise TypeError(
-                "dt is type {}, should be int or float".format(type(dt))
+                "step is type {}, should be int or float".format(type(step))
             )
-        if dt <= 0:
-            raise ValueError("dt is {}, should be positive".format(dt))
+        if step < 0:
+            raise ValueError("step is {}, should be positive".format(step))
         pos = self.getPos()
         vel = self.getVel()
-        new_pos = pos * vel * dt
+        new_pos = pos + (vel * step)
         self.setPos(new_pos)
 
     def time_to_collision(self, other):
@@ -149,11 +149,14 @@ class Ball:
         @todo: implement Container - Ball collisions
         """
         Pos = self.getPos()
+        print "Pos =", Pos
         Vel = self.getVel()
+        print "Vel =", Vel
         oMass = other.getMass()
+        print "oMass =", oMass
         if oMass < 0:
             # Collided with container
-            r_norm = Pos / _np.dot(Pos, Pos)
+            r_norm = Pos / _np.sqrt(_np.dot(Pos, Pos))
             u_perp = _np.dot(Vel, r_norm) * r_norm
             v_para = Vel - u_perp
             v_perp = -u_perp
@@ -161,26 +164,29 @@ class Ball:
             self.setVel(v)
         else:
             oPos = other.getPos()
+            print "oPos =", oPos
             oVel = other.getVel()
-            # print "oVel =", oVel
-            
+            print "oVel =", oVel
+
             Mass = self.getMass()
             r = oPos - Pos
-            r = r / (_np.dot(r, r))
+            print "r before norm =", r
+            r = r / _np.sqrt(_np.dot(r, r))
+            print "r after norm =", r
             u1_perp = _np.dot(Vel, r) * r
-            # print "u1_perp =", u1_perp
+            print "u1_perp =", u1_perp
             u2_perp = _np.dot(oVel, -r) * -r
-            # print "u2_perp =", u2_perp
+            print "u2_perp =", u2_perp
             v1_para = Vel - u1_perp
-            # print "v1_para =", v1_para
+            print "v1_para =", v1_para
             v2_para = oVel - u2_perp
-            # print "v2_para =", v2_para
+            print "v2_para =", v2_para
             v1_perp = ((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp)) /
                        (Mass + oMass))
             v2_perp = ((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass)) /
                        (Mass + oMass))
-            # print "v1_perp =", v1_perp
-            # print "v2_perp =", v2_perp
+            print "v1_perp =", v1_perp
+            print "v2_perp =", v2_perp
             v1 = v1_perp + v1_para
             v2 = v2_perp + v2_para
             self.setVel(v1)
