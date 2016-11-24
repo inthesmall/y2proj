@@ -7,13 +7,7 @@ Created on Fri Nov 18 11:52:01 2016
 import numpy as _np
 import matplotlib.pyplot as _plt
 
-
-def close(float1, float2=0.):
-    """Determine if two floats are close enough to be equal. Return bool."""
-    if abs(float1 - float2) <= (100. * _np.finfo(float).eps):
-        return True
-    else:
-        return False
+from core import close
 
 
 class Ball:
@@ -181,9 +175,9 @@ class Ball:
             print "v1_para =", v1_para
             v2_para = oVel - u2_perp
             print "v2_para =", v2_para
-            v1_perp = ((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp)) /
+            v1_perp = (((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp))) /
                        (Mass + oMass))
-            v2_perp = ((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass)) /
+            v2_perp = (((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass))) /
                        (Mass + oMass))
             print "v1_perp =", v1_perp
             print "v2_perp =", v2_perp
