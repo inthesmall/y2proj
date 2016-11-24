@@ -39,7 +39,7 @@ class Ball:
             )
         if radius <= 0:
             raise ValueError("radius is {}, should be positive".format(radius))
-        if type(pos) not in (list, _np.array):
+        if type(pos) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "pos is type {}, should be list or numpy array".format(
                     type(pos)
@@ -47,7 +47,7 @@ class Ball:
             )
         if len(pos) != 3:
             raise ValueError("pos has length {}, should be 3".format(len(pos)))
-        if type(vel) not in (list, _np.array):
+        if type(vel) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "vel is type {}, should be list or numpy array".format(
                     type(vel)
@@ -87,7 +87,7 @@ class Ball:
         return self._patch
 
     def setPos(self, new_pos):
-        if type(new_pos) not in (list, _np.array):
+        if type(new_pos) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "new_pos is type {}, should be list or numpy array".format(
                     type(new_pos)
@@ -97,7 +97,7 @@ class Ball:
         self._patch.center = self.pos_[:-1]
 
     def setVel(self, new_vel):
-        if type(new_vel) not in (list, _np.array):
+        if type(new_vel) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "new_vel is type {}, should be list or numpy array".format(
                     type(new_vel)
@@ -114,7 +114,7 @@ class Ball:
             raise ValueError("dt is {}, should be positive".format(dt))
         pos = self.getPos()
         vel = self.getVel()
-        new_pos = pos.inner(vel * dt)
+        new_pos = pos * vel * dt
         self.setPos(new_pos)
 
     def time_to_collision(self, other):
