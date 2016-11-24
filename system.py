@@ -24,15 +24,7 @@ class System:
         Args:
             balls: list, objects.Ball to include in system
             container: objects.Container for system
-
-        Defines:
-            self._balls: list of balls in system
-            self._container: the container
-            self._objects: All objects in system (balls + container)
-            self._collisions: a heap of the next collisions with
-                format [time_to_collision, (object1, object2)]
         """
-        # input checking
         if type(balls) is not list:
             raise TypeError("balls is not of type list")
         if isinstance(container, objects.Container) is False:
@@ -46,10 +38,12 @@ class System:
         self._frame = 0
 
     def init_figure(self, figure):
-        """Generate starting collisions heap, then initialise animation.
-        @todo initialise animation
         """
-        print "init_figure called"
+        Generate collisions heap, then draw objects in starting positions.
+
+        Args:
+        figure: matplotlib.pyplot.axes object. Axes to draw objects on.
+        """
         ret = []
         for i, ball in enumerate(self._balls):
             collTimes = []
@@ -59,7 +53,6 @@ class System:
                 time_to_coll = ball.time_to_collision(other)
                 if time_to_coll is not None:
                     collTimes.append([time_to_coll, (ball, other)])
-                # print collTimes
             if len(collTimes) > 0:
                 heapq.heappush(self._collisions, min(collTimes))
         # draw the figures
@@ -72,24 +65,19 @@ class System:
     def next_frame(self, f):
         """Called by matplotlib.animation.FuncAnimation()
 
-        @todo draws next frame of animation.
-        If the next collision occurs before the next frame, call collide
-        instead.
+        Advance time to when frame *f* occurs, carry out any collisions
+        on the way. Draw objects for frame *f*.
         Args:
             f: int, framenumber
         """
-        # DEBUGGING
-        print "next frame f =", f
-        for ball in self._balls:
-            print "Begin ball:"
-            print "vel =", ball.getVel()
-            print "pos =", ball.getPos()
-            print "End ball"
-        # /DEBUGGING
-
-
-
-
+        # # DEBUGGING # #
+        # print "next frame f =", f
+        # for ball in self._balls:
+        #     print "Begin ball:"
+        #     print "vel =", ball.getVel()
+        #     print "pos =", ball.getPos()
+        #     print "End ball"
+        # # /DEBUGGING # #
 
         patches = []
         self.check_collide()
@@ -101,12 +89,11 @@ class System:
         return patches
 
     def collide(self):
-        """@todo perform queued collision, then calculate and queue
-        next collision"""
+        """Perform next collision, then update the queue."""
         next_coll = heapq.heappop(self._collisions)
         obj1, obj2 = next_coll[1]
         obj1.collide(obj2, True)
-        # First, recalulate for all the objects obj1 or obj2
+        # First, recalculate for all the objects obj1 or obj2
         # collide with in the queue
         for index, collision in enumerate(self._collisions):
             if obj1 in collision[1]:
@@ -117,31 +104,27 @@ class System:
                     obj = [i for i in collision[1] if i is not obj1][0]
                     self._collisions.pop(index)
                     heapq.heapify(self._collisions)
-                    print "collision is", collision
-                    print "obj is", obj
                     self.next_collides(obj)
             elif obj2 in collision[1]:
                     obj = [i for i in collision[1] if i is not obj2][0]
                     self._collisions.pop(index)
                     heapq.heapify(self._collisions)
-                    print "collision is", collision
-                    print "obj is", obj
                     self.next_collides(obj)
-        #Then find what they actually collide with next
+        # Then find what they actually collide with next
         for obj in [obj1, obj2]:
             self.next_collides(obj)
 
     def check_collide(self):
-        """ """
-        print "collisions", self._collisions
+        """Check to see if two objects collide before the next frame.
+
+        If the next collision occurs before the next frame it will be
+        executed.
+        """
         t = self._time
         f = self._frame
-        print "time", t
-        print "frame", f
         # time at the next frame
         t_1 = (f + 1) / FRAMERATE
         dt = 1 / FRAMERATE
-        print "dt =", dt
         next_coll_t = self._collisions[0][0]
         if next_coll_t <= t_1:
             step = next_coll_t - t
@@ -153,13 +136,15 @@ class System:
             return None
 
     def tick(self, step):
+        """Advances time by an increment *step*"""
         for ball in self._balls:
             ball.move(step)
         self._time += step
 
     def next_collides(self, obj):
-        """Finds what an object next collides with, and adds it to the queue"""
-        print "next_collides passed", obj
+        """
+        Find what an object next collides with, and add it to the queue
+        """
         if isinstance(obj, objects.Container):
             return None
         collTimes = []

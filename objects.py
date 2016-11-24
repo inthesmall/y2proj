@@ -11,7 +11,26 @@ from core import close
 
 
 class Ball:
-    """"""
+    """Ball class, represents a hard sphere in the system
+
+    Methods:
+        getPos(): Return position as np.array([float, float, float]).
+        getVel(): Return velocity as np.array([float, float, float]).
+        getRadius(): Return radius as float
+        getMass(): Return mass as float
+        getPatch(): Return matplotlib.pyplot Circle object centred on
+            position of Ball, with radius equal to radius of Ball.
+        setPos(new_pos): Update position. *new_pos* is list or numpy
+            array: [x, y, z]; x, y, z are floats.
+        setVel(new_vel): Update velocity. *new_vel* is list or numpy
+            array: [v_x, v_y, v_z]; v_x, v_y, v_z are floats.
+        move(step): Move to where the object should be *step* seconds in
+            the future. *step* is float.
+        time_to_collision(other): Return how long until collision with
+            *other* in seconds, as float. Return None if no collision
+            with *other*
+        collide(other): Carry out collision with *other*.
+    """
 
     def __init__(self, mass=1, radius=1, pos=[0, 0, 0], vel=[0, 0, 0]):
         """"""
@@ -143,11 +162,8 @@ class Ball:
         @todo: implement Container - Ball collisions
         """
         Pos = self.getPos()
-        print "Pos =", Pos
         Vel = self.getVel()
-        print "Vel =", Vel
         oMass = other.getMass()
-        print "oMass =", oMass
         if oMass < 0:
             # Collided with container
             r_norm = Pos / _np.sqrt(_np.dot(Pos, Pos))
@@ -158,29 +174,19 @@ class Ball:
             self.setVel(v)
         else:
             oPos = other.getPos()
-            print "oPos =", oPos
             oVel = other.getVel()
-            print "oVel =", oVel
 
             Mass = self.getMass()
             r = oPos - Pos
-            print "r before norm =", r
             r = r / _np.sqrt(_np.dot(r, r))
-            print "r after norm =", r
             u1_perp = _np.dot(Vel, r) * r
-            print "u1_perp =", u1_perp
             u2_perp = _np.dot(oVel, -r) * -r
-            print "u2_perp =", u2_perp
             v1_para = Vel - u1_perp
-            print "v1_para =", v1_para
             v2_para = oVel - u2_perp
-            print "v2_para =", v2_para
             v1_perp = (((u1_perp * (Mass - oMass) + (2 * oMass * u2_perp))) /
                        (Mass + oMass))
             v2_perp = (((2 * Mass * u1_perp) + (u2_perp * (oMass - Mass))) /
                        (Mass + oMass))
-            print "v1_perp =", v1_perp
-            print "v2_perp =", v2_perp
             v1 = v1_perp + v1_para
             v2 = v2_perp + v2_para
             self.setVel(v1)
@@ -188,9 +194,16 @@ class Ball:
 
 
 class Container:
-    """"""
+    """
+    Spherical container for objects of type Ball. Has infinite mass.
+    """
 
     def __init__(self, radius):
+        """Initialise the container with parameters
+
+        Args:
+            radius: float. Radius of container.
+        """
         if type(radius) not in (int, float):
             raise TypeError(
                 "radius is type {}, should be int or float".format(
@@ -220,8 +233,9 @@ class Container:
         return - self._radius
 
     def getPatch(self):
-        """ """
+        """Return matplotlib.pyplot.Circle displaying Container"""
         return self._patch
 
     def getMass(self):
+        """Return -1 for Ball.collide()"""
         return -1
