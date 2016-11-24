@@ -15,8 +15,9 @@ def mainTest():
     fig = plt.figure()
     ax = plt.axes(xlim=(-20, 20), ylim=(-20, 20))
     ax.axes.set_aspect('equal')
+    mySys.init_figure(ax)
     anim = animation.FuncAnimation(
-        fig, mySys.next_frame, init_func=lambda: mySys.init_figure(ax),
+        fig, mySys.next_frame,
         interval=20, blit=True
     )
     plt.show()
