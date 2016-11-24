@@ -1,6 +1,7 @@
 import objects
 import system
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 def test():
@@ -14,5 +15,8 @@ def test():
     fig = plt.figure()
     ax = plt.axes(xlim=(-20, 20), ylim=(-20, 20))
     ax.axes.set_aspect('equal')
-    sys.init_figure(ax)
+    anim = animation.FuncAnimation(
+        fig, sys.next_frame, init_func=lambda: sys.init_figure(ax),
+        interval=20, blit=True
+    )
     plt.show()
