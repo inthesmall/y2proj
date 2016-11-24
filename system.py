@@ -4,14 +4,12 @@ Created on Fri Nov 18 19:20:05 2016
 
 @author: em1715
 """
+# @todo STOP EACH COLLISION FROM HAPPENING TWICE!
 import heapq
-import numpy as _np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
 import objects
 
-FRAMERATE = 50.
+from core import close, FRAMERATE
 
 
 class System:
@@ -44,22 +42,26 @@ class System:
         self._objects = self._balls[:]
         self._objects.append(self._container)
         self._collisions = []
+        self._time = 0.
+        self._frame = 0
 
     def init_figure(self, figure):
         """Generate starting collisions heap, then initialise animation.
         @todo initialise animation
         """
+        print "init_figure called"
         ret = []
-        for ball in self._balls:
+        for i, ball in enumerate(self._balls):
             collTimes = []
-            for other in self._objects:
+            for other in self._objects[i:]:
                 if other == ball:
                     continue
                 time_to_coll = ball.time_to_collision(other)
                 if time_to_coll is not None:
                     collTimes.append([time_to_coll, (ball, other)])
                 # print collTimes
-            heapq.heappush(self._collisions, min(collTimes))
+            if len(collTimes) > 0:
+                heapq.heappush(self._collisions, min(collTimes))
         # draw the figures
         figure.add_artist(self._container.getPatch())
         for ball in self._balls:
@@ -76,11 +78,26 @@ class System:
         Args:
             f: int, framenumber
         """
-        patches = []
-        step = self.check_collide(f)
+        # DEBUGGING
+        print "next frame f =", f
         for ball in self._balls:
-            ball.move(step)
+            print "Begin ball:"
+            print "vel =", ball.getVel()
+            print "pos =", ball.getPos()
+            print "End ball"
+        # /DEBUGGING
+
+
+
+
+
+        patches = []
+        self.check_collide()
+        step = (f / FRAMERATE) - self._time
+        self.tick(step)
+        for ball in self._balls:
             patches.append(ball.getPatch())
+        self._frame = f
         return patches
 
     def collide(self):
@@ -98,22 +115,36 @@ class System:
                     continue
                 time_to_coll = obj.time_to_collision(other)
                 if time_to_coll is not None:
-                    collTimes.append(
-                        [obj.time_to_collision(other), (obj, other)]
-                    )
-            heapq.heappush(self._collisions, min(collTimes))
+                    if close(time_to_coll, 0) is False:
+                        time_to_coll += self._time
+                        collTimes.append(
+                            [time_to_coll, (obj, other)]
+                        )
+            if len(collTimes) > 0:
+                heapq.heappush(self._collisions, min(collTimes))
 
-    def check_collide(self, f):
+    def check_collide(self):
         """ """
-        t = f / FRAMERATE
+        print "collisions", self._collisions
+        t = self._time
+        f = self._frame
+        print "time", t
+        print "frame", f
+        # time at the next frame
+        t_1 = (f + 1) / FRAMERATE
         dt = 1 / FRAMERATE
+        print "dt =", dt
         next_coll_t = self._collisions[0][0]
-        if next_coll_t <= t:
-            step = dt - (t - next_coll_t)
-            for ball in self._balls:
-                ball.move(step)
+        if next_coll_t <= t_1:
+            step = next_coll_t - t
+            self.tick(step)
             self.collide()
-            ret = self.check_collide(f)
-            return ret - step
+            self.check_collide()
+            return None
         else:
-            return dt
+            return None
+
+    def tick(self, step):
+        for ball in self._balls:
+            ball.move(step)
+        self._time += step
