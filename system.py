@@ -106,22 +106,30 @@ class System:
         next_coll = heapq.heappop(self._collisions)
         obj1, obj2 = next_coll[1]
         obj1.collide(obj2, True)
+        # First, recalulate for all the objects obj1 or obj2
+        # collide with in the queue
+        for index, collision in enumerate(self._collisions):
+            if obj1 in collision[1]:
+                if obj2 in collision[1]:
+                    self._collisions.pop(index)
+                else:
+                    # pick out the object that is not obj1
+                    obj = [i for i in collision[1] if i is not obj1][0]
+                    self._collisions.pop(index)
+                    heapq.heapify(self._collisions)
+                    print "collision is", collision
+                    print "obj is", obj
+                    self.next_collides(obj)
+            elif obj2 in collision[1]:
+                    obj = [i for i in collision[1] if i is not obj2][0]
+                    self._collisions.pop(index)
+                    heapq.heapify(self._collisions)
+                    print "collision is", collision
+                    print "obj is", obj
+                    self.next_collides(obj)
+        #Then find what they actually collide with next
         for obj in [obj1, obj2]:
-            if isinstance(obj, objects.Container):
-                continue
-            collTimes = []
-            for other in self._objects:
-                if obj == other:
-                    continue
-                time_to_coll = obj.time_to_collision(other)
-                if time_to_coll is not None:
-                    if close(time_to_coll, 0) is False:
-                        time_to_coll += self._time
-                        collTimes.append(
-                            [time_to_coll, (obj, other)]
-                        )
-            if len(collTimes) > 0:
-                heapq.heappush(self._collisions, min(collTimes))
+            self.next_collides(obj)
 
     def check_collide(self):
         """ """
@@ -148,3 +156,22 @@ class System:
         for ball in self._balls:
             ball.move(step)
         self._time += step
+
+    def next_collides(self, obj):
+        """Finds what an object next collides with, and adds it to the queue"""
+        print "next_collides passed", obj
+        if isinstance(obj, objects.Container):
+            return None
+        collTimes = []
+        for other in self._objects:
+            if obj == other:
+                continue
+            time_to_coll = obj.time_to_collision(other)
+            if time_to_coll is not None:
+                if close(time_to_coll, 0) is False:
+                    time_to_coll += self._time
+                    collTimes.append(
+                        [time_to_coll, (obj, other)]
+                    )
+        if len(collTimes) > 0:
+            heapq.heappush(self._collisions, min(collTimes))
