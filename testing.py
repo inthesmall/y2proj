@@ -9,7 +9,7 @@ def mainTest():
     reload(objects)
     reload(system)
     ball1 = objects.Ball()
-    ball2 = objects.Ball(pos=[-4, 0, 0], vel=[1, 0, 0])
+    ball2 = objects.Ball(pos=[-4, 0, 0], vel=[5, 0.1, 0])
     cont = objects.Container(12)
     mySys = system.System([ball1, ball2], cont)
     fig = plt.figure()

@@ -133,11 +133,17 @@ class Ball:
     def time_to_collision(self, other):
         # @todo
         r1 = self.getPos()
+        print "r1", r1
         v1 = self.getVel()
+        print "v1", v1
         rad1 = self.getRadius()
+        print"rad1", rad1
         r2 = other.getPos()
+        print "r2", r2
         v2 = other.getVel()
+        print "v2", v2
         rad2 = other.getRadius()
+        print "rad2", rad2
         # Define a, b, c of the quadratic equation in dt
         a = _np.dot((v1 - v2), (v1 - v2))
         a = float(a)
@@ -149,7 +155,7 @@ class Ball:
         if _np.imag(dt1) != 0:
             return None
         minimum = min(dt1, dt2)
-        if minimum > 0:
+        if minimum > 0 and not close(minimum,0):
             return float(minimum)
         maximum = max(dt1, dt2)
         if maximum > 0:

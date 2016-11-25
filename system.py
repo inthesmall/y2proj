@@ -44,6 +44,7 @@ class System:
         Args:
         figure: matplotlib.pyplot.axes object. Axes to draw objects on.
         """
+        print "called init_func"
         ret = []
         for i, ball in enumerate(self._balls):
             collTimes = []
@@ -60,6 +61,7 @@ class System:
         for ball in self._balls:
             figure.add_patch(ball.getPatch())
             ret.append(ball.getPatch())
+        print "init returned collisions", self._collisions
         return ret
 
     def next_frame(self, f):
@@ -78,7 +80,7 @@ class System:
         #     print "pos =", ball.getPos()
         #     print "End ball"
         # # /DEBUGGING # #
-
+        print "called next_frame with frame", f
         patches = []
         self.check_collide()
         step = (f / FRAMERATE) - self._time
@@ -101,11 +103,13 @@ class System:
                     self._collisions.pop(index)
                 else:
                     # pick out the object that is not obj1
-                    obj = [i for i in collision[1] if i is not obj1][0]
-                    self._collisions.pop(index)
-                    heapq.heapify(self._collisions)
-                    self.next_collides(obj)
+                    if not isinstance(obj1, objects.Container):
+                        obj = [i for i in collision[1] if i is not obj1][0]
+                        self._collisions.pop(index)
+                        heapq.heapify(self._collisions)
+                        self.next_collides(obj)
             elif obj2 in collision[1]:
+                if not isinstance(obj2, objects.Container):
                     obj = [i for i in collision[1] if i is not obj2][0]
                     self._collisions.pop(index)
                     heapq.heapify(self._collisions)
@@ -120,6 +124,7 @@ class System:
         If the next collision occurs before the next frame it will be
         executed.
         """
+        print "self._collisions", self._collisions
         t = self._time
         f = self._frame
         # time at the next frame
@@ -145,11 +150,14 @@ class System:
         """
         Find what an object next collides with, and add it to the queue
         """
+        print "next_collides on", obj
         if isinstance(obj, objects.Container):
             return None
         collTimes = []
         for other in self._objects:
+            print "other is", other
             if obj == other:
+                print "continuing"
                 continue
             time_to_coll = obj.time_to_collision(other)
             if time_to_coll is not None:
@@ -158,5 +166,6 @@ class System:
                     collTimes.append(
                         [time_to_coll, (obj, other)]
                     )
+            print "collTimes =", collTimes
         if len(collTimes) > 0:
             heapq.heappush(self._collisions, min(collTimes))

@@ -13,9 +13,10 @@ def close(float1, float2=0.):
         return False
 
 
-def distributeBalls(n):
+def distributeBalls(n, radius):
     """Arranges balls in a uniform grid with randomly distributed velocities
 
     Sum of velocities is zero.
     """
+    
     return None
