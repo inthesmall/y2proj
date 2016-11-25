@@ -134,17 +134,17 @@ class Ball:
     def time_to_collision(self, other):
         # @todo
         r1 = self.getPos()
-        core.logging.debug("r1", r1)
+        core.logging.debug("r1 {}".format(r1))
         v1 = self.getVel()
-        core.logging.debug("v1", v1)
+        core.logging.debug("v1 {}".format(v1))
         rad1 = self.getRadius()
-        core.logging.debug("rad1", rad1)
+        core.logging.debug("rad1 {}".format(rad1))
         r2 = other.getPos()
-        core.logging.debug("r2", r2)
+        core.logging.debug("r2 {}".format(r2))
         v2 = other.getVel()
-        core.logging.debug("v2", v2)
+        core.logging.debug("v2 {}".format(v2))
         rad2 = other.getRadius()
-        core.logging.debug("rad2", rad2)
+        core.logging.debug("rad2 {}".format(rad2))
         # Define a, b, c of the quadratic equation in dt
         a = _np.dot((v1 - v2), (v1 - v2))
         a = float(a)

@@ -4,8 +4,8 @@ import logging
 import time
 
 
-logging.basicConfig(filename=time.strftime("%Y%m%d-%H%M%S"),
-                    level=logging.INFO
+logging.basicConfig(filename=time.strftime("%Y%m%d-%H%M%S") + ".log",
+                    level=logging.DEBUG
                     )
 
 FRAMERATE = 50.

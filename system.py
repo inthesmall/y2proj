@@ -62,7 +62,9 @@ class System:
         for ball in self._balls:
             figure.add_patch(ball.getPatch())
             ret.append(ball.getPatch())
-        core.logging.debug("init returned collisions", self._collisions)
+        core.logging.debug(
+            "init returned collisions {}".format(self._collisions)
+        )
         return ret
 
     def next_frame(self, f):
@@ -81,7 +83,7 @@ class System:
         #     print "pos =", ball.getPos()
         #     print "End ball"
         # # /DEBUGGING # #
-        core.logging.debug("called next_frame with frame", f)
+        core.logging.debug("called next_frame with frame {}".format(f))
         patches = []
         self.check_collide()
         step = (f / FRAMERATE) - self._time
@@ -125,7 +127,7 @@ class System:
         If the next collision occurs before the next frame it will be
         executed.
         """
-        core.logging.debug("self._collisions", self._collisions)
+        core.logging.debug("self._collisions {}".format(self._collisions))
         t = self._time
         f = self._frame
         # time at the next frame
@@ -146,17 +148,17 @@ class System:
         for ball in self._balls:
             ball.move(step)
         self._time += step
-    
+
     def next_collides(self, obj):
         """
         Find what an object next collides with, and add it to the queue
         """
-        core.logging.debug("next_collides on", obj)
+        core.logging.debug("next_collides on {}".format(obj))
         if isinstance(obj, objects.Container):
             return None
         collTimes = []
         for other in self._objects:
-            core.logging.debug("other is", other)
+            core.logging.debug("other is {}".format(other))
             if obj == other:
                 core.logging.debug("continuing")
                 continue
@@ -167,6 +169,6 @@ class System:
                     collTimes.append(
                         [time_to_coll, (obj, other)]
                     )
-            core.logging.debug("collTimes =", collTimes)
+            core.logging.debug("collTimes = {}".format(collTimes))
         if len(collTimes) > 0:
             heapq.heappush(self._collisions, min(collTimes))
