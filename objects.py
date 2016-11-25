@@ -7,6 +7,7 @@ Created on Fri Nov 18 11:52:01 2016
 import numpy as _np
 import matplotlib.pyplot as _plt
 
+import core
 from core import close
 
 
@@ -133,17 +134,17 @@ class Ball:
     def time_to_collision(self, other):
         # @todo
         r1 = self.getPos()
-        print "r1", r1
+        core.logging.debug("r1", r1)
         v1 = self.getVel()
-        print "v1", v1
+        core.logging.debug("v1", v1)
         rad1 = self.getRadius()
-        print"rad1", rad1
+        core.logging.debug("rad1", rad1)
         r2 = other.getPos()
-        print "r2", r2
+        core.logging.debug("r2", r2)
         v2 = other.getVel()
-        print "v2", v2
+        core.logging.debug("v2", v2)
         rad2 = other.getRadius()
-        print "rad2", rad2
+        core.logging.debug("rad2", rad2)
         # Define a, b, c of the quadratic equation in dt
         a = _np.dot((v1 - v2), (v1 - v2))
         a = float(a)

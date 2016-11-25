@@ -1,6 +1,12 @@
 """SOME DOCSTRING"""
 import numpy as _np
+import logging
+import time
 
+
+logging.basicConfig(filename=time.strftime("%Y%m%d-%H%M%S"),
+                    level=logging.INFO
+                    )
 
 FRAMERATE = 50.
 
@@ -18,5 +24,5 @@ def distributeBalls(n, radius):
 
     Sum of velocities is zero.
     """
-    
+
     return None
