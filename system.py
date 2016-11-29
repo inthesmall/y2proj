@@ -104,6 +104,7 @@ class System:
             if obj1 in collision[1]:
                 if obj2 in collision[1]:
                     self._collisions.pop(index)
+                    heapq.heapify(self._collisions)
                 else:
                     # pick out the object that is not obj1
                     if not isinstance(obj1, objects.Container):
@@ -145,6 +146,9 @@ class System:
 
     def tick(self, step):
         """Advances time by an increment *step*"""
+        # Stop the balls from sneaking inside each other due to rounding errors
+        if step > 1E-10:
+            step -= 1E-10
         for ball in self._balls:
             ball.move(step)
         self._time += step
