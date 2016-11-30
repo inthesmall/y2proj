@@ -1,5 +1,6 @@
 import objects
 import system
+import sys
 import core
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -54,15 +55,14 @@ def genTest(n=6):
     plt.show()
 
 
-def animGenTest(n=6):
+def animGenTest(n=6, r=12., ballsize=1.):
     global mySys, fig, ax
     reload(objects)
     reload(system)
     reload(core)
-    balls = core.distributeBalls(n, 12, ballsize=0.25)
-    cont = objects.Container(12.)
+    balls = core.distributeBalls(n, r, ballsize=ballsize)
+    cont = objects.Container(r)
     mySys = system.System(balls, cont)
-    # mySys._balls[0].setVel([20, 0, 0])
     fig = plt.figure()
     ax = plt.axes(xlim=(-20, 20), ylim=(-20, 20))
     ax.axes.set_aspect('equal')
@@ -74,5 +74,34 @@ def animGenTest(n=6):
     plt.show()
 
 
+def run(args):
+    """Run the requested test function"""
+    if args[1] == "m":
+        mainTest()
+    elif args[1] == "s":
+        animGenTest(4, ballsize=1.)
+    elif args[1] == "a":
+        animGenTest(16, ballsize=0.25)
+
+
 if __name__ == '__main__':
-    animGenTest(25)
+    Logger = core.logging.getLogger()
+    args = sys.argv
+    if len(args) == 1:
+        Logger.setLevel(20)
+        animGenTest(4)
+    elif len(args) == 2:
+        Logger.setLevel(20)
+        run(args)
+    elif len(args) == 3:
+        if args[1] == "d":
+            Logger.setLevel(int(args[2]))
+            animGenTest(4)
+        else:
+            raise Exception("incorrect parameters")
+    elif len(args) == 4:
+        if args[2] == "d":
+            Logger.setLevel(int(args[3]))
+        else:
+            raise Exception("incorrect parameters")
+        run(args)
