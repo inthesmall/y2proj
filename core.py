@@ -1,5 +1,6 @@
 """SOME DOCSTRING"""
 import numpy as _np
+import numpy.random as _rand
 import logging
 import time
 
@@ -20,10 +21,14 @@ def close(float1, float2=0.):
         return False
 
 
-def distributeBalls(n, radius, ballsize=1):
+def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
     """Arranges balls in a uniform grid with randomly distributed velocities
 
     Sum of velocities is zero.
+    *v* is charcteristic velocity, not maximum due to implementation
+    contraint.
+    *dim* is number of dimensions for balls to have vel components in.
+    2 for animation, 3 generally.
     @todo implement velocity distribution
     """
     if type(n) not in (int, float):
@@ -47,16 +52,35 @@ def distributeBalls(n, radius, ballsize=1):
     per_row = int(_np.ceil(_np.sqrt(n)))
     if 2 * ballsize * per_row >= side_len:
         raise ValueError("Too many balls. Got {}".format(n))
+    # Needs neatening up
+    vx = 2 * v * (_rand.random(n) - 0.5)
+    vy = 2 * v * (_rand.random(n) - 0.5)
+    if dim == 3:
+        vz = 2 * v * (_rand.random(n) - 0.5)
+        vz -= _np.sum(vz) / n
+        vz[0] -= _np.sum(vz)
+    else:
+        vz = _np.zeros(n)
+    vx -= _np.sum(vx) / n
+    vx[0] -= _np.sum(vx)
+    vy -= _np.sum(vy) / n
+    vy[0] -= _np.sum(vy)
+    logging.debug("vx {}".format(vx))
+    logging.debug("vy {}".format(vy))
+    logging.debug("vz {}".format(vz))
     balls = []
+    ball = 0
     ballspace = side_len / per_row
     for row in xrange(per_row):
         for col in xrange(per_row):
-            if len(balls) < n:
+            if ball <= n:
                 x = ((col + 0.5) * ballspace) - (side_len / 2)
                 y = ((row + 0.5) * ballspace) - (side_len / 2)
-                balls.append(objects.Ball(pos=[x, y, 0], vel=[0, 0, 0],
+                balls.append(objects.Ball(pos=[x, y, 0],
+                                          vel=[vx[ball], vy[ball], vz[ball]],
                                           radius=ballsize
                                           ))
+                ball += 1
             else:
                 break
     return balls
