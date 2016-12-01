@@ -7,7 +7,7 @@ import time
 import objects
 
 logging.basicConfig(filename=time.strftime("%Y%m%d-%H%M%S") + ".log",
-                    level=logging.DEBUG
+                    level=logging.INFO
                     )
 
 FRAMERATE = 50.
@@ -15,29 +15,10 @@ FRAMERATE = 50.
 
 def close(float1, float2=0.):
     """Determine if two floats are close enough to be equal. Return bool."""
-    if abs(float1 - float2) <= 0.000001:
+    if abs(float1 - float2) <= (100. * _np.finfo(float).eps):
         return True
     else:
         return False
-
-
-def distributeVelocities(n, v, dim):
-    vx = 2 * v * (_rand.random(n) - 0.5)
-    vy = 2 * v * (_rand.random(n) - 0.5)
-    if dim == 3:
-        vz = 2 * v * (_rand.random(n) - 0.5)
-        vz -= _np.sum(vz) / n
-        vz[0] -= _np.sum(vz)
-    else:
-        vz = _np.zeros(n)
-    vx -= _np.sum(vx) / n
-    vx[0] -= _np.sum(vx)
-    vy -= _np.sum(vy) / n
-    vy[0] -= _np.sum(vy)
-    logging.debug("vx {}".format(vx))
-    logging.debug("vy {}".format(vy))
-    logging.debug("vz {}".format(vz))
-    return vx, vy, vz
 
 
 def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
@@ -71,14 +52,28 @@ def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
     per_row = int(_np.ceil(_np.sqrt(n)))
     if 2 * ballsize * per_row >= side_len:
         raise ValueError("Too many balls. Got {}".format(n))
-    vx, vy, vz = distributeVelocities(n=n, v=v, dim=dim)
+    # Needs neatening up
+    vx = 2 * v * (_rand.random(n) - 0.5)
+    vy = 2 * v * (_rand.random(n) - 0.5)
+    if dim == 3:
+        vz = 2 * v * (_rand.random(n) - 0.5)
+        vz -= _np.sum(vz) / n
+        vz[0] -= _np.sum(vz)
+    else:
+        vz = _np.zeros(n)
+    vx -= _np.sum(vx) / n
+    vx[0] -= _np.sum(vx)
+    vy -= _np.sum(vy) / n
+    vy[0] -= _np.sum(vy)
+    logging.debug("vx {}".format(vx))
+    logging.debug("vy {}".format(vy))
+    logging.debug("vz {}".format(vz))
     balls = []
-    # number of balls already created
     ball = 0
     ballspace = side_len / per_row
     for row in xrange(per_row):
         for col in xrange(per_row):
-            if ball < n:
+            if ball <= n:
                 x = ((col + 0.5) * ballspace) - (side_len / 2)
                 y = ((row + 0.5) * ballspace) - (side_len / 2)
                 balls.append(objects.Ball(pos=[x, y, 0],
@@ -89,4 +84,3 @@ def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
             else:
                 break
     return balls
-
