@@ -76,6 +76,10 @@ class Ball:
         self._vel = _np.array(vel)
         self._patch = _plt.Circle(self._pos[:-1], self._radius)
 
+    def __repr__(self):
+        return ("""Ball(mass={0._mass}, radius={0._radius}, pos={0._pos},\
+ vel={0._vel})""".format(self))
+
     def getPos(self):
         """
         Return position as numpy array with 3 components [x, y, z]
@@ -132,7 +136,6 @@ class Ball:
         self.setPos(new_pos)
 
     def time_to_collision(self, other):
-        # @todo
         r1 = self.getPos()
         core.logging.debug("r1 {}".format(r1))
         v1 = self.getVel()
@@ -156,7 +159,7 @@ class Ball:
         if _np.imag(dt1) != 0:
             return None
         minimum = min(dt1, dt2)
-        if minimum > 0 and not close(minimum,0):
+        if minimum > 0 and not close(minimum, 0):
             return float(minimum)
         maximum = max(dt1, dt2)
         if maximum > 0:
@@ -165,14 +168,14 @@ class Ball:
             return None
 
     def collide(self, other, call=True):
-        """Currently only works for Ball - Ball collisions.
-        @todo: implement Container - Ball collisions
+        """
         """
         Pos = self.getPos()
         Vel = self.getVel()
         oMass = other.getMass()
         if oMass < 0:
             # Collided with container
+            # @todo impart momentum to container
             r_norm = Pos / _np.sqrt(_np.dot(Pos, Pos))
             u_perp = _np.dot(Vel, r_norm) * r_norm
             v_para = Vel - u_perp
