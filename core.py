@@ -89,4 +89,3 @@ def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
             else:
                 break
     return balls
-
