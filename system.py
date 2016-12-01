@@ -108,7 +108,7 @@ class System:
         # First, recalculate for all the objects obj1 or obj2
         # collide with in the queue
         to_remove = []
-        to_collide = []
+        to_add = [obj1, obj2]
         for index, collision in enumerate(self._collisions):
             if obj1 in collision[1]:
                 if obj2 in collision[1]:
@@ -117,19 +117,17 @@ class System:
                     # pick out the object that is not obj1
                     obj = [i for i in collision[1] if i is not obj1][0]
                     to_remove.append(index)
-                    to_collide.append(obj)
+                    to_add.append(obj)
             elif obj2 in collision[1]:
                 obj = [i for i in collision[1] if i is not obj2][0]
                 to_remove.append(index)
-                to_collide.append(obj)
+                to_add.append(obj)
         # Then find what they actually collide with next
         to_remove.reverse()
         for index in to_remove:
             self._collisions.pop(index)
         heapq.heapify(self._collisions)
-        for obj in to_collide:
-            self.next_collides(obj)
-        for obj in [obj1, obj2]:
+        for obj in to_add:
             self.next_collides(obj)
 
     def check_collide(self):
@@ -143,7 +141,6 @@ class System:
         f = self._frame
         # time at the next frame
         t_1 = (f + 1) / FRAMERATE
-        dt = 1 / FRAMERATE
         next_coll_t = self._collisions[0][0]
         if next_coll_t <= t_1:
             step = next_coll_t - t

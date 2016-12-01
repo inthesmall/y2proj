@@ -10,7 +10,7 @@ logging.basicConfig(filename=time.strftime("%Y%m%d-%H%M%S") + ".log",
                     level=logging.DEBUG
                     )
 
-FRAMERATE = 50.
+FRAMERATE = 20.
 
 
 def close(float1, float2=0.):
