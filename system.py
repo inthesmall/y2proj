@@ -62,9 +62,9 @@ class System:
         for ball in self._balls:
             figure.add_patch(ball.getPatch())
             ret.append(ball.getPatch())
-        core.logging.log(15,
-                         "init returned collisions {}".format(self._collisions)
-                         )
+        core.logging.debug(
+            "init returned collisions {}".format(self._collisions)
+        )
         return ret
 
     def next_frame(self, f):
@@ -84,51 +84,41 @@ class System:
         #     print "End ball"
         # # /DEBUGGING # #
         core.logging.debug("called next_frame with frame {}".format(f))
-        core.logging.debug("container at {}".format(self._container.getPos()))
-        core.logging.debug("container vel {}".format(self._container.getVel()))
         patches = []
         self.check_collide()
         step = (f / FRAMERATE) - self._time
         self.tick(step)
-        for obj in self._objects:
-            patches.append(obj.getPatch())
+        for ball in self._balls:
+            patches.append(ball.getPatch())
         self._frame = f
         return patches
 
     def collide(self):
         """Perform next collision, then update the queue."""
-        core.logging.log(11, self._collisions)
-        core.logging.log(11, "time is {}".format(self._time))
-        core.logging.log(11, "frame is {}".format(self._frame))
-        core.logging.log(11, "objects: {}".format(self._objects))
         next_coll = heapq.heappop(self._collisions)
-        core.logging.log(11, "next_coll = {}".format(next_coll))
         obj1, obj2 = next_coll[1]
-        obj1.collide(obj2)
+        obj1.collide(obj2, True)
         # First, recalculate for all the objects obj1 or obj2
         # collide with in the queue
-        to_remove = []
-        to_collide = []
         for index, collision in enumerate(self._collisions):
             if obj1 in collision[1]:
                 if obj2 in collision[1]:
-                    to_remove.append(index)
+                    self._collisions.pop(index)
+                    heapq.heapify(self._collisions)
                 else:
                     # pick out the object that is not obj1
-                    obj = [i for i in collision[1] if i is not obj1][0]
-                    to_remove.append(index)
-                    to_collide.append(obj)
+                    if not isinstance(obj1, objects.Container):
+                        obj = [i for i in collision[1] if i is not obj1][0]
+                        self._collisions.pop(index)
+                        heapq.heapify(self._collisions)
+                        self.next_collides(obj)
             elif obj2 in collision[1]:
-                obj = [i for i in collision[1] if i is not obj2][0]
-                to_remove.append(index)
-                to_collide.append(obj)
+                if not isinstance(obj2, objects.Container):
+                    obj = [i for i in collision[1] if i is not obj2][0]
+                    self._collisions.pop(index)
+                    heapq.heapify(self._collisions)
+                    self.next_collides(obj)
         # Then find what they actually collide with next
-        to_remove.reverse()
-        for index in to_remove:
-            self._collisions.pop(index)
-        heapq.heapify(self._collisions)
-        for obj in to_collide:
-            self.next_collides(obj)
         for obj in [obj1, obj2]:
             self.next_collides(obj)
 
@@ -159,20 +149,22 @@ class System:
         # Stop the balls from sneaking inside each other due to rounding errors
         if step > 1E-10:
             step -= 1E-10
-        for obj in self._objects:
-            obj.move(step)
+        for ball in self._balls:
+            ball.move(step)
         self._time += step
 
     def next_collides(self, obj):
         """
         Find what an object next collides with, and add it to the queue
         """
-        core.logging.log(11, "next_collides on {}".format(obj))
+        core.logging.debug("next_collides on {}".format(obj))
+        if isinstance(obj, objects.Container):
+            return None
         collTimes = []
         for other in self._objects:
-            core.logging.log(11, "other is {}".format(other))
+            core.logging.debug("other is {}".format(other))
             if obj == other:
-                core.logging.log(11, "continuing")
+                core.logging.debug("continuing")
                 continue
             time_to_coll = obj.time_to_collision(other)
             if time_to_coll is not None:
@@ -181,6 +173,6 @@ class System:
                     collTimes.append(
                         [time_to_coll, (obj, other)]
                     )
-            core.logging.log(11, "collTimes = {}".format(collTimes))
+            core.logging.debug("collTimes = {}".format(collTimes))
         if len(collTimes) > 0:
             heapq.heappush(self._collisions, min(collTimes))
