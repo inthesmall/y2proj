@@ -85,7 +85,7 @@ class System:
         # # /DEBUGGING # #
         core.logging.log(15, "called next_frame with frame {}".format(f))
         core.logging.log(15, "container momentum = {}".format(
-            self._container.getMomentum))
+            self._container.getMomentum()))
         patches = []
         self.check_collide()
         step = (f / FRAMERATE) - self._time
