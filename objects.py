@@ -255,7 +255,7 @@ class oldContainer:
 class Container(Ball):
     """"""
 
-    def __init__(self, radius=12, mass=100):
+    def __init__(self, radius=12, mass=2):
         Ball.__init__(
             self, radius=radius, mass=mass, pos=[0, 0, 0], vel=[0, 0, 0]
         )
