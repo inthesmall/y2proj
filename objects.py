@@ -172,21 +172,23 @@ class Ball:
         """
         Pos = self.getPos()
         Vel = self.getVel()
-        oMass = other.getMass()
-        if oMass < 0:
+        Mass = self.getMass()
+        if isinstance(other, Container):
             # Collided with container
             # @todo impart momentum to container
             r_norm = Pos / _np.sqrt(_np.dot(Pos, Pos))
             u_perp = _np.dot(Vel, r_norm) * r_norm
             v_para = Vel - u_perp
             v_perp = -u_perp
+            dp = 2 * Mass * u_perp
+            other.addMomentum(dp)
             v = v_perp + v_para
             self.setVel(v)
         else:
             oPos = other.getPos()
             oVel = other.getVel()
+            oMass = other.getMass()
 
-            Mass = self.getMass()
             r = oPos - Pos
             r = r / _np.sqrt(_np.dot(r, r))
             u1_perp = _np.dot(Vel, r) * r
@@ -225,6 +227,7 @@ class Container:
 
         self._radius = float(radius)
         self._patch = _plt.Circle((0, 0), self._radius, fill=False)
+        self._momentum = _np.array([0., 0., 0.])
 
     def getPos(self):
         """Return zero vector for use with collisions"""
@@ -246,6 +249,9 @@ class Container:
         """Return matplotlib.pyplot.Circle displaying Container"""
         return self._patch
 
-    def getMass(self):
-        """Return -1 for Ball.collide()"""
-        return -1
+    def addMomentum(self, dp):
+        # input checking
+        self._momentum += dp
+
+    def getMomentum(self):
+        return self._momentum
