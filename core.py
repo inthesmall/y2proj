@@ -22,11 +22,19 @@ def close(float1, float2=0.):
 
 
 def distributeVelocities(n, v, dim):
+    """
+    Generate *n* velocities with zero sum, characterised by *v*
+
+    Velocity components are generated in *dim* dimensions. *v* is
+    characteristic scale of velocities, not maximum. Return velocities
+    as three numpy.array
+    """
     vx = 2 * v * (_rand.random(n) - 0.5)
     vy = 2 * v * (_rand.random(n) - 0.5)
     if dim == 3:
         vz = 2 * v * (_rand.random(n) - 0.5)
         vz -= _np.sum(vz) / n
+        # Account for rounding error
         vz[0] -= _np.sum(vz)
     else:
         vz = _np.zeros(n)
@@ -48,7 +56,6 @@ def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
     contraint.
     *dim* is number of dimensions for balls to have vel components in.
     2 for animation, 3 generally.
-    @todo implement velocity distribution
     """
     if type(n) not in (int, float):
         raise TypeError("n is type {}, should be int".format(type(n)))

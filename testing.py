@@ -17,7 +17,7 @@ def mainTest():
     fig = plt.figure()
     ax = plt.axes(xlim=(-20, 20), ylim=(-20, 20))
     ax.axes.set_aspect('equal')
-    mySys.init_figure(ax)
+    mySys.init_system(ax)
     anim = animation.FuncAnimation(
         fig, mySys.next_frame,
         interval=20, blit=True
@@ -36,7 +36,7 @@ def subTest():
     fig = plt.figure()
     ax = plt.axes(xlim=(-20, 20), ylim=(-20, 20))
     ax.axes.set_aspect('equal')
-    mySys.init_figure(ax)
+    mySys.init_system(ax)
     plt.show()
 
 
@@ -51,7 +51,7 @@ def genTest(n=6):
     fig = plt.figure()
     ax = plt.axes(xlim=(-20, 20), ylim=(-20, 20))
     ax.axes.set_aspect('equal')
-    mySys.init_figure(ax)
+    mySys.init_system(ax)
     plt.show()
 
 
@@ -66,7 +66,7 @@ def animGenTest(n=6, r=12., ballsize=1.):
     fig = plt.figure()
     ax = plt.axes(xlim=(-20, 20), ylim=(-20, 20))
     ax.axes.set_aspect('equal')
-    mySys.init_figure(ax)
+    mySys.init_system(ax)
     anim = animation.FuncAnimation(
         fig, mySys.next_frame,
         interval=20, blit=True

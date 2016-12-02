@@ -15,26 +15,29 @@ class Ball:
     """Ball class, represents a hard sphere in the system
 
     Methods:
-        getPos(): Return position as np.array([float, float, float]).
-        getVel(): Return velocity as np.array([float, float, float]).
-        getRadius(): Return radius as float
-        getMass(): Return mass as float
-        getPatch(): Return matplotlib.pyplot Circle object centred on
-            position of Ball, with radius equal to radius of Ball.
-        setPos(new_pos): Update position. *new_pos* is list or numpy
-            array: [x, y, z]; x, y, z are floats.
-        setVel(new_vel): Update velocity. *new_vel* is list or numpy
-            array: [v_x, v_y, v_z]; v_x, v_y, v_z are floats.
-        move(step): Move to where the object should be *step* seconds in
-            the future. *step* is float.
-        time_to_collision(other): Return how long until collision with
-            *other* in seconds, as float. Return None if no collision
-            with *other*
-        collide(other): Carry out collision with *other*.
+        get_pos()
+        get_vel()
+        get_radius()
+        get_mass()
+        get_patch()
+        set_pos(new_pos)
+        set_vel(new_vel)
+        move(step)
+        time_to_collision(other)
+        collide(other)
+
+
     """
 
     def __init__(self, mass=1, radius=1, pos=[0, 0, 0], vel=[0, 0, 0]):
-        """"""
+        """Initialise Ball
+
+        args:
+            mass: float
+            radius: float
+            pos: numpy.array, 3 component Cartesian position vector
+            vel: numpy.array, 3 component Cartesian velocity vector
+        """
 
         # type checking
         if type(mass) not in (int, float):
@@ -80,31 +83,43 @@ class Ball:
         return ("""Ball(mass={0._mass}, radius={0._radius}, pos={0._pos},\
  vel={0._vel})""".format(self))
 
-    def getPos(self):
+    def get_pos(self):
         """
         Return position as numpy array with 3 components [x, y, z]
+
+        x, y, z are floats.
         """
         return self._pos
 
-    def getVel(self):
+    def get_vel(self):
         """
         Return velocity as numpy array with 3 components [v_x, v_y, v_z]
+
+        v_x, v_y, v_z are floats.
         """
         return self._vel
 
-    def getRadius(self):
+    def get_radius(self):
         """Return radius as a float"""
         return self._radius
 
-    def getMass(self):
-        """ """
+    def get_mass(self):
+        """Return mass as float"""
         return self._mass
 
-    def getPatch(self):
-        """ """
+    def get_patch(self):
+        """Return matplotlib.pyplot.Circle representing Ball
+
+        Circle centred on position of Ball, with radius equal to radius
+        of Ball.
+        """
         return self._patch
 
-    def setPos(self, new_pos):
+    def set_pos(self, new_pos):
+        """Update position to *new_pos*
+
+        *new_pos* is list or numpy.array: [x, y, z]; x, y, z are floats
+        """
         if type(new_pos) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "new_pos is type {}, should be list or numpy array".format(
@@ -114,7 +129,12 @@ class Ball:
         self._pos = _np.array(new_pos)
         self._patch.center = self._pos[:-1]
 
-    def setVel(self, new_vel):
+    def set_vel(self, new_vel):
+        """Update position to *new_vel*
+
+        *new_vel* is list or numpy.array: [v_x, v_y, v_z];
+        v_x, v_y, v_z are floats
+        """
         if type(new_vel) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "new_vel is type {}, should be list or numpy array".format(
@@ -124,29 +144,39 @@ class Ball:
         self._vel = _np.array(new_vel)
 
     def move(self, step):
+        """Move Ball to where it should be in *step* seconds
+
+        *step* is float
+        """
         if type(step) not in (int, float):
             raise TypeError(
                 "step is type {}, should be int or float".format(type(step))
             )
         if step < 0:
             raise ValueError("step is {}, should be positive".format(step))
-        pos = self.getPos()
-        vel = self.getVel()
+        pos = self.get_pos()
+        vel = self.get_vel()
         new_pos = pos + (vel * step)
-        self.setPos(new_pos)
+        self.set_pos(new_pos)
 
     def time_to_collision(self, other):
-        r1 = self.getPos()
+        """Return time until collision with *other* in seconds.
+
+        *other* is Ball or Container.
+        Retun time as float. If Ball does not collide with *other*,
+        return None.
+        """
+        r1 = self.get_pos()
         core.logging.debug("r1 {}".format(r1))
-        v1 = self.getVel()
+        v1 = self.get_vel()
         core.logging.debug("v1 {}".format(v1))
-        rad1 = self.getRadius()
+        rad1 = self.get_radius()
         core.logging.debug("rad1 {}".format(rad1))
-        r2 = other.getPos()
+        r2 = other.get_pos()
         core.logging.debug("r2 {}".format(r2))
-        v2 = other.getVel()
+        v2 = other.get_vel()
         core.logging.debug("v2 {}".format(v2))
-        rad2 = other.getRadius()
+        rad2 = other.get_radius()
         core.logging.debug("rad2 {}".format(rad2))
         # Define a, b, c of the quadratic equation in dt
         a = _np.dot((v1 - v2), (v1 - v2))
@@ -167,27 +197,28 @@ class Ball:
         else:
             return None
 
-    def collide(self, other, call=True):
+    def collide(self, other):
+        """Carry out collision with *other*
+
+        *other* is Ball or Container.
+        Update velocity of Ball and *other* as result of the collision.
         """
-        """
-        Pos = self.getPos()
-        Vel = self.getVel()
-        Mass = self.getMass()
+        Pos = self.get_pos()
+        Vel = self.get_vel()
+        Mass = self.get_mass()
         if isinstance(other, Container):
-            # Collided with container
-            # @todo impart momentum to container
             r_norm = Pos / _np.sqrt(_np.dot(Pos, Pos))
             u_perp = _np.dot(Vel, r_norm) * r_norm
             v_para = Vel - u_perp
             v_perp = -u_perp
             dp = 2 * Mass * u_perp
-            other.addMomentum(dp)
+            other.add_momentum(dp)
             v = v_perp + v_para
-            self.setVel(v)
+            self.set_vel(v)
         else:
-            oPos = other.getPos()
-            oVel = other.getVel()
-            oMass = other.getMass()
+            oPos = other.get_pos()
+            oVel = other.get_vel()
+            oMass = other.get_mass()
 
             r = oPos - Pos
             r = r / _np.sqrt(_np.dot(r, r))
@@ -201,8 +232,8 @@ class Ball:
                        (Mass + oMass))
             v1 = v1_perp + v1_para
             v2 = v2_perp + v2_para
-            self.setVel(v1)
-            other.setVel(v2)
+            self.set_vel(v1)
+            other.set_vel(v2)
 
 
 class Container:
@@ -229,15 +260,15 @@ class Container:
         self._patch = _plt.Circle((0, 0), self._radius, fill=False)
         self._momentum = _np.array([0., 0., 0.])
 
-    def getPos(self):
+    def get_pos(self):
         """Return zero vector for use with collisions"""
         return _np.array([0, 0, 0])
 
-    def getVel(self):
+    def get_vel(self):
         """Return zero vector for use with collisions"""
         return _np.array([0, 0, 0])
 
-    def getRadius(self):
+    def get_radius(self):
         """Return negative radius as float.
 
         Radius is negative to allow interoperability with standard
@@ -245,13 +276,13 @@ class Container:
         """
         return - self._radius
 
-    def getPatch(self):
+    def get_patch(self):
         """Return matplotlib.pyplot.Circle displaying Container"""
         return self._patch
 
-    def addMomentum(self, dp):
+    def add_momentum(self, dp):
         # input checking
         self._momentum += dp
 
-    def getMomentum(self):
+    def get_momentum(self):
         return self._momentum

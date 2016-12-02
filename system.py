@@ -38,34 +38,32 @@ class System:
         self._time = 0.
         self._frame = 0
 
-    def init_figure(self, figure):
-        """
-        Generate collisions heap, then draw objects in starting positions.
+    def init_system(self, figure):
+        """Initialise system.
+
+        Generate collisions heap. If animating, draw objects in their
+        starting positions on *figure*
 
         Args:
         figure: matplotlib.pyplot.axes object. Axes to draw objects on.
+            Pass None if not animating.
         """
         core.logging.log(10, "called init_func")
         ret = []
         for i, ball in enumerate(self._balls):
-            collTimes = []
-            for other in self._objects[i:]:
-                if other == ball:
-                    continue
-                time_to_coll = ball.time_to_collision(other)
-                if time_to_coll is not None:
-                    collTimes.append([time_to_coll, (ball, other)])
-            if len(collTimes) > 0:
-                heapq.heappush(self._collisions, min(collTimes))
-        # draw the figures
-        figure.add_artist(self._container.getPatch())
-        for ball in self._balls:
-            figure.add_patch(ball.getPatch())
-            ret.append(ball.getPatch())
-        core.logging.log(8,
-                         "init returned collisions {}".format(self._collisions)
-                         )
-        return ret
+            self.next_collides(ball)
+
+        if figure is not None:
+            # draw the figures
+            figure.add_artist(self._container.get_patch())
+            for ball in self._balls:
+                figure.add_patch(ball.get_patch())
+                ret.append(ball.get_patch())
+            core.logging.log(8,
+                             "init returned collisions {}".format(
+                                 self._collisions)
+                             )
+            return ret
 
     def next_frame(self, f):
         """Called by matplotlib.animation.FuncAnimation()
@@ -75,23 +73,15 @@ class System:
         Args:
             f: int, framenumber
         """
-        # # DEBUGGING # #
-        # print "next frame f =", f
-        # for ball in self._balls:
-        #     print "Begin ball:"
-        #     print "vel =", ball.getVel()
-        #     print "pos =", ball.getPos()
-        #     print "End ball"
-        # # /DEBUGGING # #
         core.logging.log(15, "called next_frame with frame {}".format(f))
         core.logging.log(15, "container momentum = {}".format(
-            self._container.getMomentum()))
+            self._container.get_momentum()))
         patches = []
         self.check_collide()
         step = (f / FRAMERATE) - self._time
         self.tick(step)
         for ball in self._balls:
-            patches.append(ball.getPatch())
+            patches.append(ball.get_patch())
         self._frame = f
         return patches
 
@@ -99,7 +89,7 @@ class System:
         """Perform next collision, then update the queue."""
         next_coll = heapq.heappop(self._collisions)
         obj1, obj2 = next_coll[1]
-        obj1.collide(obj2, True)
+        obj1.collide(obj2)
         # First, recalculate for all the objects obj1 or obj2
         # collide with in the queue
         to_remove = []
@@ -126,17 +116,22 @@ class System:
         for obj in to_add:
             self.next_collides(obj)
 
-    def check_collide(self):
-        """Check to see if two objects collide before the next frame.
+    def check_collide(self, end_t=0):
+        """
+        Check to see if two objects collide before *end_t* or next frame
 
-        If the next collision occurs before the next frame it will be
-        executed.
+        If the next collision occurs before *end_t* or next frame, call
+        collide().
+        If animating, pass *end_t* = 0.
         """
         core.logging.log(11, "self._collisions {}".format(self._collisions))
         t = self._time
         f = self._frame
         # time at the next frame
-        t_1 = (f + 1) / FRAMERATE
+        if end_t == 0:
+            t_1 = (f + 1) / FRAMERATE
+        else:
+            t_1 = end_t
         next_coll_t = self._collisions[0][0]
         if next_coll_t <= t_1:
             step = next_coll_t - t
@@ -148,7 +143,7 @@ class System:
             return None
 
     def tick(self, step):
-        """Advances time by an increment *step*"""
+        """Advances time by an increment *step*, in seconds"""
         # Stop the balls from sneaking inside each other due to rounding errors
         if step > 1E-10:
             step -= 1E-10
