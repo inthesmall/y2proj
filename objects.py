@@ -259,6 +259,17 @@ class Container:
         self._radius = float(radius)
         self._patch = _plt.Circle((0, 0), self._radius, fill=False)
         self._momentum = _np.array([0., 0., 0.])
+        self._mag_momentum = 0
+
+    def __repr__(self):
+        return """Container(radius=12)"""
+
+    def __str__(self):
+        return """(Container, radius = {}, momentum = {},
+            mag_momentum = {})""".format(
+            -self.get_radius(),
+            self.get_momentum(),
+            self.get_mag_momentum())
 
     def get_pos(self):
         """Return zero vector for use with collisions"""
@@ -283,6 +294,10 @@ class Container:
     def add_momentum(self, dp):
         # input checking
         self._momentum += dp
+        self._mag_momentum += _np.sqrt(_np.dot(dp, dp))
 
     def get_momentum(self):
         return self._momentum
+
+    def get_mag_momentum(self):
+        return self._mag_momentum
