@@ -10,7 +10,7 @@ import heapq
 import objects
 
 import core
-from core import close, FRAMERATE
+from core import close, FRAMERATE, Kb
 
 
 class System:
@@ -137,7 +137,7 @@ class System:
             step = next_coll_t - t
             self.tick(step)
             self.collide()
-            self.check_collide()
+            self.check_collide(end_t)
             return None
         else:
             return None
@@ -174,3 +174,42 @@ class System:
             core.logging.log(8, "collTimes = {}".format(collTimes))
         if len(collTimes) > 0:
             heapq.heappush(self._collisions, min(collTimes))
+
+    def total_KE(self):
+        KE = 0
+        for ball in self._balls:
+            V2 = 0
+            mass = ball.get_mass() * core.MASS
+            vel = ball.get_vel()
+            V2 = core._np.dot(vel, vel)
+            KE += 0.5 * mass * V2
+        return KE
+
+    def mean_KE(self):
+        KE = self.total_KE()
+        return KE / len(self._balls)
+
+    def temperature(self):
+        return (2. / 3.) * self.mean_KE() / Kb
+
+    def pressure(self, step):
+        time = self._time
+        end_t = time + step
+        p0 = self._container.get_mag_momentum() * core.MASS
+        print "p0 is", p0
+        self.check_collide(end_t=end_t)
+        p1 = self._container.get_mag_momentum() * core.MASS
+        print "p1 is", p1
+        t_remaining = (time + step) - self._time
+        self.tick(t_remaining)
+        dp = p1 - p0
+        F = dp / step
+        P = F / (4 * core._np.pi * self._container.get_radius() ** 2)
+        return P
+
+    def get_total_momentum(self):
+        p = 0
+        for ball in self._balls:
+            p += ball.get_mass() * ball.get_vel()
+        p += self._container.get_momentum()
+        return p
