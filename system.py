@@ -8,8 +8,10 @@ Created on Fri Nov 18 19:20:05 2016
 import heapq
 
 import objects
-
 import core
+
+import numpy as _np
+
 from core import close, FRAMERATE, Kb
 
 
@@ -142,6 +144,11 @@ class System:
         else:
             return None
 
+    def advance(self, step):
+        t = self._time
+        end_t = t + step
+        self.check_collide(end_t)
+
     def tick(self, step):
         """Advances time by an increment *step*, in seconds"""
         # Stop the balls from sneaking inside each other due to rounding errors
@@ -204,7 +211,7 @@ class System:
         self.tick(t_remaining)
         dp = p1 - p0
         F = dp / step
-        P = F / (4 * core._np.pi * self._container.get_radius() ** 2)
+        P = F / (4 * _np.pi * self._container.get_radius() ** 2)
         return P
 
     def get_total_momentum(self):
