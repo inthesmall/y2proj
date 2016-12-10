@@ -1,9 +1,12 @@
+import sys
+
 import objects
 import system
-import sys
 import core
+
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import numpy as np
 
 
 def mainTest():
@@ -45,7 +48,7 @@ def genTest(n=6):
     reload(objects)
     reload(system)
     reload(core)
-    balls = core.distributeBalls(n, 12)
+    balls = objects.distributeBalls(n, 12)
     cont = objects.Container(12.)
     mySys = system.System(balls, cont)
 
@@ -55,7 +58,7 @@ def animGenTest(n=6, r=12., ballsize=1.):
     reload(objects)
     reload(system)
     reload(core)
-    balls = core.distributeBalls(n, r, ballsize=ballsize)
+    balls = objects.distributeBalls(n, r, ballsize=ballsize)
     cont = objects.Container(r)
     mySys = system.System(balls, cont)
     fig = plt.figure()
@@ -75,7 +78,7 @@ def physicsTest(num_balls=200, ballsize=0.01):
     reload(objects)
     reload(system)
     reload(core)
-    balls = core.distributeBalls(
+    balls = objects.distributeBalls(
         n=num_balls, radius=12, ballsize=ballsize)
     cont = objects.Container(12)
     mySys = system.System(balls, cont)
@@ -85,10 +88,10 @@ def physicsTest(num_balls=200, ballsize=0.01):
     print "pressure", P
     print "temp", mySys.temperature()
     core.logging.log(50, "temp is {}".format(mySys.temperature()))
-    a = P * (4. / 3.) * core._np.pi * 12.**3
+    a = P * (4. / 3.) * np.pi * 12.**3
     b = num_balls * core.Kb * mySys.temperature()
-    c = P * (((4. / 3.) * core._np.pi * 12.**3)
-             - ((16. / 3.) * core._np.pi * ballsize**3 * num_balls)
+    c = P * (((4. / 3.) * np.pi * 12.**3)
+             - ((16. / 3.) * np.pi * ballsize**3 * num_balls)
              )
     print "Pv", a
     print "nkT", b
@@ -111,7 +114,7 @@ def conservationTest(step=5):
     reload(objects)
     reload(system)
     reload(core)
-    balls = core.distributeBalls(20, 12, ballsize=0.1)
+    balls = objects.distributeBalls(20, 12, ballsize=0.1)
     cont = objects.Container(12)
     mySys = system.System(balls, cont)
     mySys.init_system(None)
@@ -124,10 +127,6 @@ def conservationTest(step=5):
         core.logging.log(20, "Momentum conserved")
     else:
         core.logging.log(50, "Momentum not conserved")
-
-
-def genPV():
-    None
 
 
 def run(args):
