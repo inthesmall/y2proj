@@ -1,13 +1,24 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri Nov 18 11:52:01 2016
+Contains object for use in System.
 
-@author: em1715
+Defines:
+    Ball, Class
+    Container, Class
+
+    distributeBalls(n, radius, ballsize=1, v=8., dim=2), function,
+        create Ball objects
+
+Ethan Mills
+@todo ellipse collisions
+@todo finish ellipse container
+@todo diatomic molecules
 """
-import numpy as _np
-import matplotlib.pyplot as _plt
-
 import core
+
+import matplotlib.pyplot as _plt
+import numpy as _np
+import numpy.random as _rand
+
 from core import close
 
 
@@ -25,8 +36,6 @@ class Ball:
         move(step)
         time_to_collision(other)
         collide(other)
-
-
     """
 
     def __init__(self, mass=1, radius=1, pos=[0, 0, 0], vel=[0, 0, 0]):
@@ -39,37 +48,29 @@ class Ball:
             vel: numpy.array, 3 component Cartesian velocity vector
         """
 
-        # type checking
+        # input checking
         if type(mass) not in (int, float):
             raise TypeError(
-                "mass type {}, should be int or float".format(type(mass))
-            )
+                "mass type {}, should be int or float".format(type(mass)))
         if mass < 0:
             raise ValueError(
-                "mass is {}, should be positive or zero.".format(mass)
-            )
+                "mass is {}, should be positive or zero.".format(mass))
         if type(radius) not in (int, float):
             raise TypeError(
                 "radius is type {}, should be int or float".format(
-                    type(radius)
-                )
-            )
+                    type(radius)))
         if radius <= 0:
             raise ValueError("radius is {}, should be positive".format(radius))
         if type(pos) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "pos is type {}, should be list or numpy array".format(
-                    type(pos)
-                )
-            )
+                    type(pos)))
         if len(pos) != 3:
             raise ValueError("pos has length {}, should be 3".format(len(pos)))
         if type(vel) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "vel is type {}, should be list or numpy array".format(
-                    type(vel)
-                )
-            )
+                    type(vel)))
         if len(vel) != 3:
             raise ValueError("vel has length {}, should be 3".format(len(vel)))
 
@@ -120,12 +121,12 @@ class Ball:
 
         *new_pos* is list or numpy.array: [x, y, z]; x, y, z are floats
         """
+        # input checking
         if type(new_pos) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "new_pos is type {}, should be list or numpy array".format(
-                    type(new_pos)
-                )
-            )
+                    type(new_pos)))
+
         self._pos = _np.array(new_pos)
         self._patch.center = self._pos[:-1]
 
@@ -135,12 +136,12 @@ class Ball:
         *new_vel* is list or numpy.array: [v_x, v_y, v_z];
         v_x, v_y, v_z are floats
         """
+        # input checking
         if type(new_vel) not in (list, _np.array, _np.ndarray):
             raise TypeError(
                 "new_vel is type {}, should be list or numpy array".format(
-                    type(new_vel)
-                )
-            )
+                    type(new_vel)))
+
         self._vel = _np.array(new_vel)
 
     def move(self, step):
@@ -148,12 +149,13 @@ class Ball:
 
         *step* is float
         """
+        # input checking
         if type(step) not in (int, float):
             raise TypeError(
-                "step is type {}, should be int or float".format(type(step))
-            )
+                "step is type {}, should be int or float".format(type(step)))
         if step < 0:
             raise ValueError("step is {}, should be positive".format(step))
+
         pos = self.get_pos()
         vel = self.get_vel()
         new_pos = pos + (vel * step)
@@ -239,6 +241,15 @@ class Ball:
 class Container:
     """
     Spherical container for objects of type Ball. Has infinite mass.
+
+    Methods:
+        get_pos()
+        get_vel()
+        get_radius()
+        get_patch()
+        add_momentum(dp)
+        get_momentum()
+        get_mag_momentum()
     """
 
     def __init__(self, radius):
@@ -247,12 +258,11 @@ class Container:
         Args:
             radius: float. Radius of container.
         """
+        # input checking
         if type(radius) not in (int, float):
             raise TypeError(
                 "radius is type {}, should be int or float".format(
-                    type(radius)
-                )
-            )
+                    type(radius)))
         if radius <= 0:
             raise ValueError("radius is {}, should be positive".format(radius))
 
@@ -292,12 +302,111 @@ class Container:
         return self._patch
 
     def add_momentum(self, dp):
+        """Add momentum to container. *dp* is numpy.array"""
         # input checking
+        if type(dp) not in (_np.array, _np.ndarray):
+            raise TypeError(
+                "dp is type {}, should be numpy.array".format(type(dp)))
+
         self._momentum += dp
         self._mag_momentum += _np.sqrt(_np.dot(dp, dp))
 
     def get_momentum(self):
+        """Return momentum as numpy.array"""
         return self._momentum
 
     def get_mag_momentum(self):
+        """Return magnitude of mometum as float"""
         return self._mag_momentum
+
+
+class EllipticalContainer(Container):
+    def __init__(self, radius, a, b):
+        # @todo input checking
+        # might not need radius
+        Container.__init__(self, radius)
+        self.a = a
+        self.b = b
+
+    def get_patch(self):
+        """override Container.get_patch"""
+        # @todo
+        None
+
+    def get_radius(self):
+        """probably override Container.get_radius()"""
+        None
+
+
+class Diatom:
+    def __init__(self):
+        return None
+
+
+def _distributeVelocities(n, v, dim):
+    vx = 2 * v * (_rand.random(n) - 0.5)
+    vy = 2 * v * (_rand.random(n) - 0.5)
+    if dim == 3:
+        vz = 2 * v * (_rand.random(n) - 0.5)
+        vz -= _np.sum(vz) / n
+        # Account for rounding error
+        vz[0] -= _np.sum(vz)
+    else:
+        vz = _np.zeros(n)
+    vx -= _np.sum(vx) / n
+    vx[0] -= _np.sum(vx)
+    vy -= _np.sum(vy) / n
+    vy[0] -= _np.sum(vy)
+    core.logging.debug("vx {}".format(vx))
+    core.logging.debug("vy {}".format(vy))
+    core.logging.debug("vz {}".format(vz))
+    return vx, vy, vz
+
+
+def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
+    """Arranges balls in a uniform grid with randomly distributed velocities
+
+    Sum of velocities is zero.
+    *v* is characteristic velocity, approximately equal to v_max/sqrt(3)
+    *dim* is number of dimensions for balls to have vel components in.
+    2 for animation.
+    """
+    if type(n) not in (int, float):
+        raise TypeError("n is type {}, should be int".format(type(n)))
+    if n <= 0:
+        raise ValueError("n has value {}, should be positive".format(n))
+    if n % 1 != 0:
+        raise ValueError("n is {}, should be an integer".format(n))
+    if type(radius) not in (int, float):
+        raise TypeError("radius has type {}, should be float")
+    if type(ballsize) not in (int, float):
+        raise TypeError(
+            "ballsize has type {}, should be float".format(type(ballsize))
+        )
+    if ballsize <= 0:
+        raise ValueError("ballsize is {}, should be positive".format(ballsize))
+    # Container objects return a negative radius for collisions, we need
+    # this to be positive
+    radius = _np.abs(float(radius))
+    side_len = _np.sqrt(2) * radius
+    per_row = int(_np.ceil(_np.sqrt(n)))
+    if 2 * ballsize * per_row >= side_len:
+        raise ValueError("Too many balls. Got {}".format(n))
+    vx, vy, vz = _distributeVelocities(n=n, v=v, dim=dim)
+    balls = []
+    # number of balls already created
+    ball = 0
+    ballspace = side_len / per_row
+    for row in xrange(per_row):
+        for col in xrange(per_row):
+            if ball < n:
+                x = ((col + 0.5) * ballspace) - (side_len / 2)
+                y = ((row + 0.5) * ballspace) - (side_len / 2)
+                balls.append(Ball(pos=[x, y, 0],
+                                  vel=[vx[ball], vy[ball], vz[ball]],
+                                  radius=ballsize
+                                  ))
+                ball += 1
+            else:
+                break
+    return balls
