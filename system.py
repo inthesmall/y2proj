@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri Nov 18 19:20:05 2016
+System to run everything
 
-@author: em1715
+Defines:
+    System, Class
+
+Ethan Mills
 """
-# @todo STOP EACH COLLISION FROM HAPPENING TWICE!
 import heapq
 
 import objects
@@ -145,6 +146,7 @@ class System:
             return None
 
     def advance(self, step):
+        """Move the system forward in time by *step* seconds"""
         t = self._time
         end_t = t + step
         self.check_collide(end_t)
@@ -183,6 +185,7 @@ class System:
             heapq.heappush(self._collisions, min(collTimes))
 
     def total_KE(self):
+        """Return total system KE as float"""
         KE = 0
         for ball in self._balls:
             V2 = 0
@@ -193,13 +196,16 @@ class System:
         return KE
 
     def mean_KE(self):
+        """Return mean ball KE as float"""
         KE = self.total_KE()
         return KE / len(self._balls)
 
     def temperature(self):
+        """Return temperature of system as float"""
         return (2. / 3.) * self.mean_KE() / Kb
 
     def pressure(self, step):
+        """Return pressure of system averaged over *step* seconds as float"""
         time = self._time
         end_t = time + step
         p0 = self._container.get_mag_momentum() * core.MASS
@@ -215,8 +221,9 @@ class System:
         return P
 
     def get_total_momentum(self):
+        """Return total momentum of container and all balls. Should be zero"""
         p = 0
         for ball in self._balls:
-            p += ball.get_mass() * ball.get_vel()
+            p += ball.get_mass() * ball.get_vel() 
         p += self._container.get_momentum()
         return p

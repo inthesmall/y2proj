@@ -14,7 +14,7 @@ import numpy as _np
 
 
 logging.basicConfig(filename=time.strftime("%Y%m%d-%H%M%S") + ".log",
-                    level=logging.DEBUG
+                    level=20
                     )
 
 
