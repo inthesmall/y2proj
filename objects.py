@@ -4,6 +4,7 @@ Contains object for use in System.
 Defines:
     Ball, Class
     Container, Class
+    BigBall, Class
 
     distributeBalls(n, radius, ballsize=1, v=8., dim=2), function,
         create Ball objects
@@ -338,10 +339,30 @@ class EllipticalContainer(Container):
         None
 
 
-class Diatom:
-    def __init__(self):
-        return None
+class BigBall(Ball):
+    """Large ball for use in brownian motion
 
+    Extends Ball by tracking position nodes.
+    methods:
+        get_nodes: returns a list of positions where the velocity of
+            BillBall changed
+    """
+    def __init__(self, mass=1, radius=1, pos=[0, 0, 0], vel=[0, 0, 0]):
+        Ball.__init__(self, mass, radius, pos, vel)
+        self._nodes = [[self.get_pos()[0]], [self.get_pos()[1]], [self.get_pos()[2]]]
+
+    def set_vel(self, new_vel):
+        """Extends Ball.set_vel to track nodes"""
+        self._nodes[0].append(self.get_pos()[0])
+        self._nodes[1].append(self.get_pos()[1])
+        self._nodes[2].append(self.get_pos()[2])
+        Ball.set_vel(self, new_vel)
+
+    def get_nodes(self):
+        """
+        Return list of position vectors of points where velocity changed
+        """
+        return self._nodes
 
 def _distributeVelocities(n, v, dim):
     vx = 2 * v * (_rand.random(n) - 0.5)
@@ -388,11 +409,18 @@ def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
     # Container objects return a negative radius for collisions, we need
     # this to be positive
     radius = _np.abs(float(radius))
+    if dim == 2:
+        return _distributeBalls2D(n=n, radius=radius, ballsize=ballsize, v=v)
+    elif dim == 3:
+        return _distributeBalls3D(n=n, radius=radius, ballsize=ballsize, v=v)
+
+
+def _distributeBalls2D(n, radius, ballsize, v):
     side_len = _np.sqrt(2) * radius
     per_row = int(_np.ceil(_np.sqrt(n)))
     if 2 * ballsize * per_row >= side_len:
         raise ValueError("Too many balls. Got {}".format(n))
-    vx, vy, vz = _distributeVelocities(n=n, v=v, dim=dim)
+    vx, vy, vz = _distributeVelocities(n=n, v=v, dim=2)
     balls = []
     # number of balls already created
     ball = 0
@@ -409,4 +437,33 @@ def distributeBalls(n, radius, ballsize=1, v=8., dim=2):
                 ball += 1
             else:
                 break
+    return balls
+
+
+def _distributeBalls3D(n, radius, ballsize, v):
+    side_len = _np.sqrt(2) * radius
+    print side_len
+    per_row = int(_np.ceil(n**(1. / 3.)))
+    print per_row
+    if 2 * ballsize * per_row >= side_len:
+        raise ValueError("Too many balls. Got {}".format(n))
+    vx, vy, vz = _distributeVelocities(n=n, v=v, dim=3)
+    balls = []
+    # number of balls already created
+    ball = 0
+    ballspace = side_len / per_row
+    for row in xrange(per_row):
+        y = ((row + 0.5) * ballspace) - (side_len / 2)
+        for col in xrange(per_row):
+            x = ((col + 0.5) * ballspace) - (side_len / 2)
+            for layer in xrange(per_row):
+                if ball < n:
+                    z = ((layer + 0.5) * ballspace) - (side_len / 2)
+                    balls.append(Ball(pos=[x, y, z],
+                                      vel=[vx[ball], vy[ball], vz[ball]],
+                                      radius=ballsize
+                                      ))
+                    ball += 1
+                else:
+                    break
     return balls
